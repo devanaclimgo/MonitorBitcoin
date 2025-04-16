@@ -15,7 +15,8 @@ class Bitcoin
 
     if response.success?
       price = fetch_bitcoin_price(response.body, symbol)
-      puts "The current price of #{symbol} in USD dollars is $#{price}"
+      rounded_price = price.round(2)
+      puts "The current price of #{symbol} in USD dollars is $#{rounded_price}"
     else
       puts "Error: #{response.code} - #{response.body}"
     end
