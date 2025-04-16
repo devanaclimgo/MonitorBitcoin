@@ -1,25 +1,33 @@
-require "net/http"
+require "httparty"
 require "json"
 require "pry"
 
 class Bitcoin
-  def initialize(url)
-    @url = url
-  end
+  API_KEY = "b92b2638-81ef-495b-80ae-0c2588a1b585"
+   API_URL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
 
-  def actual_price
-    puts "The current price of bitcoin n USD dollars is #{bitcoin_price}"
+   def fetch(symbol = 'BTC')
+    response = HTTParty.get(
+      API_URL,
+      headers: { 'X-CMC_PRO_API_KEY' => API_KEY },
+      query: { 'symbol' => symbol }
+    )
+
+    if response.success?
+      price = fetch_bitcoin_price(response.body, symbol)
+      puts "The current price of #{symbol} in USD dollars is $#{price}"
+    else
+      puts "Error: #{response.code} - #{response.body}"
+    end
   end
 
   private
 
-  def fetch_bitcoin_price
-    url = URI("https://api.coindesk.com/v1/bpi/currentprice/BTC.json")
-    response = Net::HTTP.get(url)
-    data = JSON.parse(response)
-
-    return data['bpi']['USD']['date']
+  def fetch_bitcoin_price(json_response, symbol)
+    data = JSON.parse(json_response)
+    data['data'][symbol]['quote']['USD']['price']
   end
 end 
 
-Bitcoin.new("https://api.coindesk.com/v1/bpi/currentprice/BTC.json").actual_price
+fetcher = Bitcoin.new
+fetcher.fetch('BTC')
